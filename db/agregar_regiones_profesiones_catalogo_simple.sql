@@ -1,0 +1,43 @@
+-- =============================================================================
+-- Fix (septiembre 2026): agregar los valores "regiones" y "profesiones" al
+-- enum `catalogo_simple`.
+--
+-- ESTE ARCHIVO NO SE APLICÓ AUTOMÁTICAMENTE. Debe ejecutarse a mano en el
+-- SQL Editor del proyecto real de Supabase.
+--
+-- Causa raíz del error reportado por el usuario:
+--   "invalid input value for enum catalogo_simple: 'profesiones'"
+-- al intentar agregar una nueva "Región" (FMV) o "Profesión" (Nuevo Speaker)
+-- desde "Catálogos de opciones".
+--
+-- `src/lib/enums.ts` (CATALOGO_SIMPLE, tipo TypeScript) ya incluye
+-- "regiones" (entrega 6, FMV — "Región" pasó de texto libre a catálogo) y
+-- "profesiones" (entrega de "Profesión" en Nuevo Speaker), y el código de
+-- la aplicación ya asume que ambos valores existen como opciones válidas
+-- del catálogo. Pero ninguna migración en este repositorio agregó esos dos
+-- valores al enum real `catalogo_simple` en Postgres — el archivo
+-- `agregar_numero_documento_fmv.sql` de esa misma entrega dice
+-- explícitamente que "Región" "solo se les agregó un catálogo/filtro del
+-- lado de la aplicación", sin el paso correspondiente en la base de datos.
+-- El resultado: el tipo TypeScript permite elegir "regiones"/"profesiones"
+-- en el editor de catálogos, pero el `insert` a `catalogo_valores` falla
+-- porque Postgres rechaza cualquier valor que el enum no reconozca.
+--
+-- `ALTER TYPE ... ADD VALUE IF NOT EXISTS` es seguro de re-ejecutar (no
+-- falla si el valor ya existe) y no borra ni modifica ningún valor
+-- existente del enum.
+--
+-- Nota: en Postgres, un `ALTER TYPE ... ADD VALUE` no puede usarse en la
+-- misma transacción en la que luego se lea/inserte ese valor nuevo — por
+-- eso este archivo solo agrega los valores; una vez ejecutado, el catálogo
+-- ya queda utilizable de inmediato desde una consulta/transacción distinta
+-- (que es exactamente como lo usará la aplicación).
+-- =============================================================================
+
+alter type catalogo_simple add value if not exists 'regiones';
+alter type catalogo_simple add value if not exists 'profesiones';
+
+-- Verificación opcional después de ejecutar:
+--   select unnest(enum_range(null::catalogo_simple))::text as valor
+--   order by valor;
+-- Debe incluir 'regiones' y 'profesiones' en la lista.

@@ -1,0 +1,556 @@
+@import "tailwindcss";
+
+/*
+  Tokens de tema BEATS — recuperados por extracción forense del bundle
+  original (bundle.html conservado por el usuario desde antes de la
+  pérdida del código fuente). Convención shadcn/ui: variables "crudas" en
+  :root, mapeadas a colores de Tailwind vía @theme inline. Los tokens de
+  marca (--brand-*), de sidebar (--sidebar-*) y de estado (--status-*) son
+  colores hexadecimales directos (algunos con alpha de 2 dígitos), tal como
+  estaban en el original — no HSL crudo como el resto de los tokens, que sí
+  siguen el formato "H S% L%" para poder combinarse con opacidad vía
+  hsl(var(--token) / <alpha>).
+*/
+
+:root {
+  /* Rediseño visual "enterprise, sobrio, ergonómico" (septiembre 2026,
+     pedido explícito): radio de esquina más generoso (~12px, equivalente a
+     `rounded-xl`) en vez del `rounded-md` más cerrado que traía la
+     reconstrucción original. */
+  --radius: .75rem;
+
+  /* Fondo clínico blanco-hielo ultra tenue (#FCFDFE) en vez del gris
+     apagado anterior — mismo tono de --foreground/--card, sin cambios ahí. */
+  --background: 210 40% 99%;
+  --foreground: 210 4% 30%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 210 4% 30%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 210 4% 30%;
+
+  /* Azul institucional del rediseño (#00A3E0) — prácticamente idéntico al
+     azul de marca ya reconstruido (#00a1e4), así que no rompe la identidad
+     visual original, solo la alinea con el valor exacto pedido. */
+  --primary: 196 100% 44%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 210 6% 94%;
+  --secondary-foreground: 210 4% 30%;
+
+  --muted: 210 10% 95%;
+  /* Ajuste de precisión (septiembre 2026), pedido explícito: "Textos
+     secundarios y descriptivos: text-slate-500" — se afina el token que ya
+     usa toda la app para texto secundario (`text-muted-foreground`) al
+     valor exacto de slate-500 (#64748b), en vez de un gris más desaturado,
+     para que se propague sin tocar cada uso uno por uno. */
+  --muted-foreground: 215 16% 47%;
+
+  /* "Listas desplegables armonizadas": fondo azul clínico claro (#E0F2FE,
+     equivalente a sky-100) con texto azul corporativo (#0284C7, sky-600) —
+     pedido explícito para el resaltado de <SelectItem>/estados hover. */
+  --accent: 204 94% 94%;
+  --accent-foreground: 200 98% 39%;
+
+  --destructive: 4 74% 42%;
+  --destructive-foreground: 0 0% 100%;
+
+  /* Bordes sutiles y limpios estilo slate-200. */
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 196 100% 44%;
+
+  /* Marca BEATS / Bausch — alineada al azul institucional del rediseño
+     (#00A3E0 / #0091C8, el mismo par usado en el gradiente de los botones
+     primarios más abajo). */
+  --brand-blue: #00a3e0;
+  --brand-blue-dark: #0091c8;
+  --brand-gray: #494c4f;
+
+  /* Sidebar: tokens propios, distintos de --background/--card, para que el
+     sidebar pueda tener su propia superficie independiente del resto de la
+     app (confirmado en el original: el sidebar es blanco/gris-oscuro fijo,
+     no sigue --background). */
+  --sidebar-bg: #fff;
+  --sidebar-fg: var(--brand-gray);
+  --sidebar-muted: var(--brand-gray);
+  --sidebar-active-bg: #00a1e414;
+  --sidebar-active-fg: var(--brand-blue);
+  --sidebar-border: #e9ebed;
+
+  /* Estados de documento (estado_doc) */
+  --status-draft-bg: #f2f3f4;
+  --status-draft-fg: var(--brand-gray);
+  --status-draft-border: #e1e3e5;
+
+  --status-pending-bg: #fff6d9;
+  --status-pending-fg: #8a6d1d;
+  --status-pending-border: #f3e1a3;
+
+  --status-approved-bg: #e3f5fd;
+  --status-approved-fg: #007fb3;
+  --status-approved-border: #bbe6f8;
+
+  --status-completed-bg: #e6f6ec;
+  --status-completed-fg: #1b7a43;
+  --status-completed-border: #bfe8cc;
+
+  --status-rejected-bg: #fef3f2;
+  --status-rejected-fg: #b42318;
+  --status-rejected-border: #fecdca;
+
+  /* "void" en el original = nuestro "cancelled" (mismo estado, otro nombre) */
+  --status-cancelled-bg: #eceae9;
+  --status-cancelled-fg: #57534e;
+  --status-cancelled-border: #d6d3d1;
+
+  /* Rediseño visual (septiembre 2026), pedido explícito: "Aplica
+     exclusivamente la fuente Roboto en todas sus variantes necesarias
+     (300/400/500/700/900)". Roboto pasa a ser la fuente real de toda la
+     app (título y cuerpo); Lato queda solo como respaldo si Roboto no
+     cargara (Google Fonts, ver <link> en index.html, entrada-ejecucion.html
+     y entrada-marquesina.html, ya con el peso 900 agregado). */
+  --font-display: "Roboto", "Lato", "Aptos", "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Roboto", "Lato", "Aptos", "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Modo oscuro: el original nunca tuvo un selector manual de tema (no hay
+   ningún punto del bundle que lea/escriba data-theme), así que solo se
+   activa vía prefers-color-scheme del sistema operativo. Se deja también
+   :root[data-theme=dark] por si en el futuro se agrega un selector manual
+   — hoy no hay ninguna UI que lo dispare. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: 210 6% 10%;
+    --foreground: 210 10% 92%;
+
+    --card: 210 6% 13%;
+    --card-foreground: 210 10% 92%;
+
+    --popover: 210 6% 13%;
+    --popover-foreground: 210 10% 92%;
+
+    --primary: 198 85% 62%;
+    --primary-foreground: 210 6% 10%;
+
+    --secondary: 210 6% 18%;
+    --secondary-foreground: 210 10% 90%;
+
+    --muted: 210 6% 18%;
+    --muted-foreground: 210 8% 65%;
+
+    --accent: 198 40% 20%;
+    --accent-foreground: 198 85% 75%;
+
+    --destructive: 4 63% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 6% 22%;
+    --input: 210 6% 22%;
+    --ring: 198 85% 62%;
+
+    --sidebar-bg: #1e2021;
+    --sidebar-fg: #f5f7f8;
+    --sidebar-muted: #8b9194;
+    --sidebar-active-bg: #0b3a50;
+    --sidebar-active-fg: #6cd0ff;
+    --sidebar-border: #2e3032;
+
+    --status-draft-bg: #94a0be24;
+    --status-draft-fg: #b7c0da;
+    --status-draft-border: #94a0be4d;
+
+    --status-pending-bg: #fbbf5a24;
+    --status-pending-fg: #f5b14c;
+    --status-pending-border: #fbbf5a52;
+
+    --status-approved-bg: #00a1e429;
+    --status-approved-fg: #6cd0ff;
+    --status-approved-border: #00a1e459;
+
+    --status-completed-bg: #34c77f24;
+    --status-completed-fg: #4ade9c;
+    --status-completed-border: #34c77f52;
+
+    --status-rejected-bg: #f8716624;
+    --status-rejected-fg: #ff9285;
+    --status-rejected-border: #f8716652;
+
+    --status-cancelled-bg: #a8a29e24;
+    --status-cancelled-fg: #d6d3d1;
+    --status-cancelled-border: #a8a29e52;
+  }
+}
+
+:root[data-theme="dark"] {
+  --background: 210 6% 10%;
+  --foreground: 210 10% 92%;
+
+  --card: 210 6% 13%;
+  --card-foreground: 210 10% 92%;
+
+  --popover: 210 6% 13%;
+  --popover-foreground: 210 10% 92%;
+
+  --primary: 198 85% 62%;
+  --primary-foreground: 210 6% 10%;
+
+  --secondary: 210 6% 18%;
+  --secondary-foreground: 210 10% 90%;
+
+  --muted: 210 6% 18%;
+  --muted-foreground: 210 8% 65%;
+
+  --accent: 198 40% 20%;
+  --accent-foreground: 198 85% 75%;
+
+  --destructive: 4 63% 55%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 210 6% 22%;
+  --input: 210 6% 22%;
+  --ring: 198 85% 62%;
+
+  --sidebar-bg: #1e2021;
+  --sidebar-fg: #f5f7f8;
+  --sidebar-muted: #8b9194;
+  --sidebar-active-bg: #0b3a50;
+  --sidebar-active-fg: #6cd0ff;
+  --sidebar-border: #2e3032;
+
+  --status-draft-bg: #94a0be24;
+  --status-draft-fg: #b7c0da;
+  --status-draft-border: #94a0be4d;
+
+  --status-pending-bg: #fbbf5a24;
+  --status-pending-fg: #f5b14c;
+  --status-pending-border: #fbbf5a52;
+
+  --status-approved-bg: #00a1e429;
+  --status-approved-fg: #6cd0ff;
+  --status-approved-border: #00a1e459;
+
+  --status-completed-bg: #34c77f24;
+  --status-completed-fg: #4ade9c;
+  --status-completed-border: #34c77f52;
+
+  --status-rejected-bg: #f8716624;
+  --status-rejected-fg: #ff9285;
+  --status-rejected-border: #f8716652;
+
+  --status-cancelled-bg: #a8a29e24;
+  --status-cancelled-fg: #d6d3d1;
+  --status-cancelled-border: #a8a29e52;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  /* Los tokens de marca, sidebar y estado ya son colores directos (hex,
+     algunos con alpha) — se mapean tal cual, sin envolver en hsl(). */
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-blue-dark: var(--brand-blue-dark);
+  --color-brand-gray: var(--brand-gray);
+
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-sidebar-fg: var(--sidebar-fg);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-active-bg: var(--sidebar-active-bg);
+  --color-sidebar-active-fg: var(--sidebar-active-fg);
+  --color-sidebar-border: var(--sidebar-border);
+
+  --color-status-draft-bg: var(--status-draft-bg);
+  --color-status-draft-fg: var(--status-draft-fg);
+  --color-status-draft-border: var(--status-draft-border);
+  --color-status-pending-bg: var(--status-pending-bg);
+  --color-status-pending-fg: var(--status-pending-fg);
+  --color-status-pending-border: var(--status-pending-border);
+  --color-status-approved-bg: var(--status-approved-bg);
+  --color-status-approved-fg: var(--status-approved-fg);
+  --color-status-approved-border: var(--status-approved-border);
+  --color-status-completed-bg: var(--status-completed-bg);
+  --color-status-completed-fg: var(--status-completed-fg);
+  --color-status-completed-border: var(--status-completed-border);
+  --color-status-rejected-bg: var(--status-rejected-bg);
+  --color-status-rejected-fg: var(--status-rejected-fg);
+  --color-status-rejected-border: var(--status-rejected-border);
+  --color-status-cancelled-bg: var(--status-cancelled-bg);
+  --color-status-cancelled-fg: var(--status-cancelled-fg);
+  --color-status-cancelled-border: var(--status-cancelled-border);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    font-family: var(--font-body);
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+    font-weight: 700;
+    /* Ajuste de precisión (septiembre 2026): "Títulos de sección:
+       text-slate-900 font-bold" — pedido explícito. */
+    color: hsl(222 47% 11%);
+  }
+  .font-mono-tab {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  /* Ajuste de precisión (septiembre 2026), pedido explícito: "Formateo de
+     moneda en vivo en el mismo campo" — los inputs numéricos de monto ya no
+     usan `type="number"` con flechitas nativas de incremento (ver
+     `InputMoneda`, en `components/ui/input-moneda.tsx`), pero se deja esta
+     regla global por si algún `type="number"` residual queda en el proyecto
+     (otros campos numéricos que no son de dinero, p. ej. cantidades). */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+/* Impresión: solo se ve la zona marcada, todo lo demás (sidebar, botones,
+   toasts) se oculta. Mismo patrón del bundle original: window.print() sobre
+   un contenedor de impresión, con una clase de utilidad para ocultar UI. */
+@media print {
+  /* AJUSTES (septiembre/octubre 2026), pedido explícito: "una sola marca de
+     agua ... centrada, en cada hoja del documento". Sin declarar el tamaño
+     de página/margen explícitamente, el margen real que usa cada hoja al
+     imprimir queda a criterio del diálogo de impresión del navegador
+     (variable, no controlable desde CSS) — y la baldosa de la marca de agua
+     (`BALDOSA_MARCA_AGUA` en `DocumentoImprimible.tsx`) necesita coincidir
+     EXACTO con el alto de contenido de cada hoja física para que el patrón
+     de fondo quede un alineado, una vez por hoja, sin ir "desfasándose"
+     página tras página. `size: letter` + `margin: 0.5in` deja ese alto fijo
+     y conocido (11in − 2×0.5in = 10in = 960px a 96px/in), que es justo el
+     valor que usa `BALDOSA_MARCA_AGUA.alto` — verificado con Playwright/
+     Chromium headless generando un PDF real de varias páginas.
+     (Chromium respeta `@page` tanto al exportar a PDF vía `page.pdf()` como
+     en el diálogo real de "Imprimir" del navegador mientras el margen del
+     diálogo quede en su opción por defecto; si el usuario lo cambia a mano
+     a "Ninguno"/personalizado, el navegador prioriza esa elección.) */
+  @page {
+    size: letter;
+    margin: 0.5in;
+  }
+
+  .no-imprimir {
+    display: none !important;
+  }
+  html,
+  body {
+    overflow: visible !important;
+    background: white;
+  }
+
+  /*
+   * Fase 5 (quinta entrega) — corrige un documento largo (p. ej. Solicitud
+   * de Evento, con ~40 campos) que al imprimir/exportar a PDF solo mostraba
+   * la PRIMERA página, con la barra de desplazamiento vertical todavía
+   * visible en la vista previa de impresión, en vez de paginarse en tantas
+   * hojas como hiciera falta.
+   *
+   * Causa real: el diálogo (Radix/shadcn `DialogContent`, `role="dialog"`)
+   * que envuelve la vista de impresión usa `position: fixed` + una altura
+   * fija (`h-screen`, para que la vista previa en pantalla ocupe toda la
+   * ventana — Fase 5, cuarta entrega) + `overflow-y: auto` — combinación
+   * pensada para la PANTALLA (un panel con su propio scroll interno), pero
+   * que en IMPRESIÓN hace que el navegador solo capture lo que cabía en un
+   * viewport y recorte el resto, en vez de tratarlo como contenido normal
+   * de documento que se puede paginar. Se neutraliza por completo para
+   * impresión: pasa a fluir en el documento como cualquier otro contenido,
+   * con su altura natural (la del documento completo), así el navegador sí
+   * puede partirlo en tantas hojas físicas como haga falta.
+   */
+  [role="dialog"] {
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+    /*
+     * AJUSTES (septiembre/octubre 2026, histórico): Tailwind v4 compila las
+     * utilidades `translate-x-0 translate-y-0` (usadas por la ventana de
+     * impresión de los 6 `Detalle*.tsx` para cancelar el centrado por
+     * defecto del diálogo) a la propiedad CSS `translate` (independiente de
+     * `transform` desde CSS Transforms Level 2), no a
+     * `transform: translate(...)` como en versiones anteriores de
+     * Tailwind — por eso se resetea aparte, `transform: none` (arriba) no
+     * alcanza. (Nota: esto originalmente importaba también porque cualquier
+     * valor de `translate` distinto de `none` creaba un "containing block"
+     * nuevo que rompía `MarcaDeAgua`/`MembreteImpreso` cuando esos dos eran
+     * `position: fixed` — ya no lo son, ver sus comentarios en
+     * `DocumentoImprimible.tsx` — pero el reset se deja de todas formas:
+     * sigue siendo lo correcto para que el diálogo fluya como contenido
+     * normal de documento al imprimir, sin ningún `transform`/`translate`
+     * residual de la vista en pantalla.)
+     */
+    translate: none !important;
+    rotate: none !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /*
+   * La corrección de arriba (position: static) tuvo un efecto secundario
+   * real, confirmado con una captura del usuario ("la página aparece en
+   * blanco, solo con el encabezado/pie de página del navegador"): al pasar
+   * el diálogo de `position: fixed` (que en pantalla queda POR ENCIMA del
+   * resto de la app, ocultándola visualmente vía z-index/superposición) a
+   * `position: static` (contenido normal, en el flujo del documento), el
+   * fondo de la app (`#root` — Tablero, sidebar, lo que sea que estuviera
+   * abierto detrás del diálogo) dejó de estar oculto para IMPRESIÓN: la
+   * superposición por z-index es un efecto de composición en pantalla que
+   * la impresión no respeta, así que el navegador simplemente imprimía
+   * TODO el contenido en el orden del documento — el fondo de la app
+   * primero, y muy abajo, recién, el documento real — lo que en la
+   * práctica se veía como páginas en blanco (el fondo de la app, con sus
+   * propios fondos de color que "Gráficos de fondo" del navegador
+   * normalmente no imprime) antes de llegar al contenido real.
+   *
+   * `#root` es el nodo raíz de React (`index.html`) — el diálogo (Radix
+   * `DialogPortal`) se renderiza aparte, directo sobre `<body>`, nunca
+   * dentro de `#root` — así que ocultar `#root` para impresión nunca oculta
+   * el diálogo mismo. Se condiciona con `:has()` a que haya un diálogo
+   * abierto en la página (`body:has([role="dialog"])`) para no afectar al
+   * generador standalone "Informe por Evento" (`InformePorEvento.tsx`), que
+   * SÍ imprime directamente desde `#root` (es una página normal de la app,
+   * no un diálogo) y debe seguir viéndose igual que siempre.
+   */
+  body:has([role="dialog"]) #root {
+    display: none !important;
+  }
+
+  /*
+   * Además del fondo de la app (`#root`, ya oculto arriba), Radix agrega su
+   * propio overlay semitransparente (`position: fixed; inset: 0`, un
+   * hermano directo de `<body>`, independiente de `#root`) detrás del
+   * diálogo — normalmente invisible al imprimir porque es un color de
+   * fondo y la mayoría de navegadores no imprimen "gráficos de fondo" por
+   * defecto, pero no hay que depender de esa configuración del usuario: se
+   * oculta explícitamente. Se apunta a cualquier `<div>` hijo directo de
+   * `<body>` que NO sea `#root` ni el diálogo mismo, en vez de a una clase
+   * puntual, para cubrir también cualquier otro portal fijo de Radix sin
+   * tener que enumerarlos uno por uno.
+   */
+  body:has([role="dialog"]) > div:not(#root):not([role="dialog"]) {
+    display: none !important;
+  }
+
+  /*
+   * Fase 8 (ajuste cosmético, histórico): el zoom en pantalla de
+   * `DocumentoImprimible.tsx` (`#zona-imprimible`) usa las utilidades
+   * `scale-*` de Tailwind — en Tailwind v4 estas fijan la propiedad CSS
+   * `scale` (independiente de `transform` desde CSS Transforms Level 2), no
+   * `transform` como en versiones anteriores. Sin este reset, un documento
+   * impreso con el zoom de pantalla distinto de 100% se imprimía/exportaba
+   * igual de "acercado o alejado" que en pantalla, en vez de siempre a
+   * tamaño real — por eso se resetea aquí a `none` para impresión sin
+   * depender de en qué zoom haya quedado la vista previa. Tailwind no trae
+   * una utilidad "scale-none" lista, así que el reset vive aquí.
+   *
+   * (Nota septiembre/octubre 2026: este reset nació originalmente también
+   * para evitar que `scale` creara un nuevo "containing block" que rompía
+   * `MarcaDeAgua`/`MembreteImpreso`, que entonces eran `position: fixed`.
+   * Ambos se reescribieron para dejar de depender de `position: fixed` por
+   * completo — ver sus comentarios en `DocumentoImprimible.tsx` — así que
+   * esa razón ya no aplica, pero el reset del zoom para impresión sigue
+   * siendo necesario por la razón de arriba.)
+   *
+   * Ojo con este bug de minificación (confirmado con Lightning CSS, el
+   * minificador que usa el build de Tailwind v4): declarar en esta misma
+   * regla también `transform: none !important` hace que el minificador
+   * las funda en una sola declaración y DESCARTE la de `scale` por
+   * completo (las trata como redundantes entre sí, cuando no lo son). Por
+   * eso esta regla declara ÚNICAMENTE `scale` — `transform` en
+   * `#zona-imprimible` ya es `none` de por sí (el zoom de
+   * `DocumentoImprimible.tsx` solo usa `scale-*`, nunca `transform-*`), así
+   * que no hace falta resetearlo aparte.
+   */
+  #zona-imprimible {
+    scale: none !important;
+  }
+}
+
+/* AJUSTES (septiembre/octubre 2026), pedido explícito: "independiente de si
+   marco 'Sí' o 'No' en firma externa, no cambia (ni se quita ni se pone)
+   cuando estoy en Imprimir/Exportar PDF" — la marca de agua de
+   `#zona-imprimible` (`DocumentoImprimible.tsx`, `construirFondoMarcaDeAgua`)
+   es un `background-image`, y los navegadores, por defecto, NO imprimen
+   fondos (color o imagen) al exportar a PDF/imprimir salvo que el CSS lo
+   declare explícitamente — sin esto, el fondo se omitía SIEMPRE al
+   imprimir, con el interruptor en cualquier posición (de ahí "no cambia").
+   `print-color-adjust`/`-webkit-print-color-adjust: exact` fuerza a que SÍ
+   se impriman los fondos de este nodo, sin que el usuario tenga que activar
+   a mano "Gráficos de fondo" en el diálogo de impresión. No tiene efecto
+   visual en pantalla (solo aplica a impresión), así que se deja fuera de
+   `@media print` sin problema. */
+#zona-imprimible {
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+/* AJUSTES (septiembre/octubre 2026): `MarcaDeAgua` y `MembreteImpreso`
+   (`DocumentoImprimible.tsx`) ya NO usan `position: fixed` — ver sus
+   comentarios — así que esta regla ya no tiene ningún elemento real al que
+   aplicarle el reset dentro del generador standalone "Informe por Evento".
+   Se deja de todas formas como protección, por si algún elemento `fixed`
+   vuelve a aparecer ahí en el futuro: dentro de `.formulario-render` (que
+   apila varios documentos en una sola página larga) cualquier `fixed`
+   quedaría flotando respecto a la ventana del navegador en vez de respecto
+   al documento que lo contiene, que es casi nunca lo que se quiere ahí. */
+.formulario-render .fixed {
+  position: absolute !important;
+}
+
+/* AJUSTES (septiembre/octubre 2026), pedido explícito: la fila de filtros
+   de tipo de documento del Tablero ya no se parte en dos líneas
+   (`flex-nowrap` + `overflow-x-auto`, ver Tablero.tsx), pero el usuario
+   reportó que la barra de desplazamiento horizontal que eso introduce no
+   es agradable ni pertinente. Se oculta visualmente (el contenedor sigue
+   siendo desplazable con gestos/rueda si alguna vez no caben todas las
+   pastillas en una pantalla muy angosta, solo que sin la barra visible). */
+.sin-barra-desplazamiento {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge viejo */
+}
+.sin-barra-desplazamiento::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Edge nuevo */
+}

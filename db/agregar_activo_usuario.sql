@@ -1,0 +1,51 @@
+-- =============================================================================
+-- Habilitar/inhabilitar usuarios desde "Usuarios y Roles" (septiembre 2026).
+--
+-- ESTE ARCHIVO NO SE APLICÓ AUTOMÁTICAMENTE. Debe ejecutarse a mano en el
+-- SQL Editor del proyecto real de Supabase (mismo criterio que el resto de
+-- migraciones de este proyecto).
+--
+-- Qué agrega y por qué:
+--
+--   `usuarios.activo` (boolean, default `true`) — un Administrador puede
+--   inhabilitar temporalmente a un colaborador sin borrar su fila (conserva
+--   su historial de auditoría, aprobaciones firmadas, etc.) y volver a
+--   habilitarlo después. El valor default `true` es a propósito: todas las
+--   filas YA EXISTENTES en la tabla real deben seguir activas — nadie queda
+--   bloqueado por accidente al correr esta migración.
+--
+-- Alcance (respeta lo ya existente en la pantalla): la lista de "Usuarios y
+-- Roles" que ve un Administrador de alcance limitado (`administrador_
+-- alcance_limitado = true`) YA se filtra en el cliente a solo los
+-- colaboradores que comparten empresa del grupo y país de operación con él
+-- (ver `AlcanceUsuario`/`dentroDelAlcance` en `src/lib/usuarios.ts`) — por
+-- eso el interruptor de habilitar/inhabilitar no necesita ninguna
+-- restricción de alcance adicional: si esa fila no está en su alcance, esa
+-- persona nunca la ve en la tabla para empezar. La única regla nueva
+-- (aplicada del lado del cliente, en `UsuariosRoles.tsx`) es que nadie
+-- puede inhabilitar su propia cuenta.
+--
+-- Efecto en el login (ver `src/hooks/useAuth.tsx`): al iniciar sesión (o en
+-- cualquier recarga de la sesión), si `activo = false` para ese colaborador,
+-- se cierra la sesión automáticamente con un mensaje explicando que la
+-- cuenta fue inhabilitada. IMPORTANTE — límite conocido: esto se revisa
+-- cuando `useAuth` vuelve a cargar el usuario (login, recarga de página, o
+-- un evento de `onAuthStateChange`), no revoca en el acto una sesión que ya
+-- estaba abierta en otra pestaña/dispositivo — quien inhabilita a alguien
+-- que en ese momento tiene la app abierta, sigue viéndola hasta que esa
+-- pestaña se recargue o el token expire. Para revocar la sesión al
+-- instante (ej. `supabase.auth.admin.updateUserById(..., { ban_duration })`
+-- desde una función Edge con `service_role`), hace falta una función Edge
+-- nueva — no implementado en esta entrega porque no fue lo pedido.
+--
+-- Antes de ejecutar, confirma que no colisiona con nada existente:
+--   select column_name from information_schema.columns
+--   where table_name = 'usuarios' and column_name = 'activo';
+-- =============================================================================
+
+alter table public.usuarios
+  add column if not exists activo boolean not null default true;
+
+-- Si el error "Could not find the 'activo' column ... in the schema cache"
+-- aparece justo después de correr esto, fuerza el refresco de PostgREST:
+--   NOTIFY pgrst, 'reload schema';
