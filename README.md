@@ -1,5 +1,8 @@
 # BEATS — Bausch Events Approval & Tracking System
 
+Para una guia tecnica en espanol de la arquitectura, funcionalidades, datos,
+desarrollo y despliegue, ver [docs/DOCUMENTACION_PROYECTO.md](docs/DOCUMENTACION_PROYECTO.md).
+
 Reconstrucción completa desde cero de las 3 aplicaciones de BEATS, hecha
 sin acceso al código fuente original (perdido por completo — ver
 `db/` más abajo para lo que NO se recuperó). La reconstrucción se guió,
